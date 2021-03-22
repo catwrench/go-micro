@@ -1,0 +1,77 @@
+syntax = "proto3";
+package meeting;
+import "proto/response/response.proto";//标红无所谓，一样能导入
+option go_package = ".;proto";
+
+service RoomService{
+  //查询会议室列表
+  rpc GetRooms(ReqGetRooms) returns(response.Response){}
+  //查询会议室详情
+  rpc GetRoom(ReqGetRoom) returns(response.Response){}
+  //新增会议室
+  rpc CreateRoom(ReqCreateRoom) returns(response.Response){}
+  //编辑会议室
+  rpc UpdateRoom(ReqUpdateRoom) returns(response.Response){}
+  //删除会议室
+  rpc DeleteRoom(ReqDeleteRoom) returns(response.Response){}
+}
+
+message Room{
+  int64 id = 1;
+  int64 space_id = 2;//所属地点ID
+  string name = 3;//会议室名称
+  oneof one_status{
+    string status = 4;// 启用状态：0禁用、1启用
+  };
+  string image_url = 5;//会议室图片
+  int64 capacity_min = 6;//建议使用人数（最小）
+  int64 capacity_max = 7;//建议使用人数（最大）
+  string created_at = 8;
+}
+
+message ReqGetRooms{
+  int64 page = 1;
+  int64 pageSize = 2;
+  string sortBy = 3;
+  string order = 4;
+  int64 space_id = 5;
+  string name = 6;
+  oneof one_status{
+    string status = 7;
+  };
+}
+
+message ReqGetRoom{
+  int64 id = 1;
+}
+
+message ReqCreateRoom{
+  int64 space_id = 2;
+  string name = 3;
+  oneof one_status{
+    string status = 4;
+  };
+  string image_url = 5;
+  int64 capacity_min = 6;
+  int64 capacity_max = 7;
+  string DeviceIds = 8;
+}
+
+message ReqUpdateRoom{
+  int64 id = 1;
+  int64 space_id = 2;
+  string name = 3;
+  oneof one_status{
+    string status = 4;
+  };
+  string image_url = 5;
+  int64 capacity_min = 6;
+  int64 capacity_max = 7;
+  string DeviceIds = 8;
+}
+
+message ReqDeleteRoom{
+  int64 id = 1;
+}
+
+

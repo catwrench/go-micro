@@ -1,0 +1,31 @@
+syntax = "proto3";
+package notice;
+import "proto/response/response.proto";//标红无所谓，一样能导入
+import "google/protobuf/any.proto";
+
+option go_package = ".;proto";
+
+// protoc --go_out=转换输出为go文件的目录 --micro_out=转换输出为micro微服务文件的目录 原始proto文件所在位置
+// protoc --go_out=notice-srv/build --micro_out=notice-srv/build notice-srv/proto/notice.proto
+
+service NoticeService{
+  rpc GetNotices(ReqGetNotices) returns(response.Response){}
+  rpc CreateNotice(ReqNoticeCreate) returns(response.Response){}
+}
+message ReqGetNotices{
+  int64 page = 1;
+  int64 pageSize = 2;
+  string sortBy = 3;
+  string order = 4;
+  string name = 5;
+}
+message ReqNoticeCreate{
+  string UserType = 1;
+  int64  UserId = 2;
+  string UserName = 3;
+  string OpenId = 4;
+  string Content = 5;
+  google.protobuf.Any Template = 6;
+}
+
+

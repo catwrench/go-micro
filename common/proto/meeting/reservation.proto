@@ -1,0 +1,52 @@
+syntax = "proto3";
+package meeting;
+import "proto/response/response.proto";//标红无所谓，一样能导入
+
+option go_package = ".;proto";
+
+service ReservationService{
+  //会议预订列表
+  rpc GetReservations(ReqGetReservations) returns (response.Response){}
+  //会议详情
+  rpc GetReservation(ReqGetReservation) returns (response.Response){}
+  //预订会议室
+  rpc CreateReservation(ReqCreateReservation) returns (response.Response){}
+}
+
+message Reservation{
+  int64 id = 1;
+  int64 room_id = 2;             //会议室id
+  string title = 3;              //会议主题
+  string content = 4;            //会议内容
+  int64 initiator_id = 5;        //发起人id
+  string initiator_name = 6;     //发起人
+  string date = 7;               //会议日期
+  string start_time = 8;         //会议开始时间
+  string end_time = 9;           //会议结束时间
+  string created_at = 10;
+}
+
+message ReqGetReservations{
+  int64 page = 1;
+  int64 pageSize = 2;
+  string sortBy = 3;
+  string order = 4;
+  int64 room_id = 5;
+  string start_date = 6;
+  string end_date = 7;
+}
+message ReqGetReservation{
+  int64 id = 1;
+}
+message ReqCreateReservation{
+  int64 room_id = 1;
+  string title = 2;
+  string content = 3;
+  int64 initiator_id = 4;
+  string participants_ids = 5;//参与人id
+  string date = 6;
+  string start_time = 7;
+  string end_time = 8;
+  string token = 9;
+  int64 c_id = 10;
+}

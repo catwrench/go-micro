@@ -1,0 +1,170 @@
+version: '3.1'
+
+services:
+  #mysql服务
+  db:
+    build: ./mysql
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ${MYSQL_DATA_DIR}:/var/lib/mysql
+      - ${MYSQL_LOG}:/var/log/mysql
+    ports:
+      - "${MYSQL_PORT}:3306"
+    environment:
+      #mysql的root密码
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      #容器会创建的数据库
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      #test用户
+      MYSQL_USER: ${MYSQL_TEST_USER}
+      #test用户的密码
+      MYSQL_PASS: ${MYSQL_TEST_PASSWORD}
+    networks:
+      - gomicro
+
+  #redis服务
+  redis:
+    build: ./redis
+    ports:
+      - "${REDIS_PORT}:6379"
+      #指定创建redis容器后，设置的密码
+    #command:
+    #  - "--requirepass Admin@${REDIS_PASSWORD}"
+    networks:
+      - gomicro
+
+  # ------------------------------
+  # 注册中心 etcd
+  etcd:
+    image: bitnami/etcd:3
+    ports:
+      - 2379:2379
+      - 2380:2380
+    environment:
+      ALLOW_NONE_AUTHENTICATION: ${ALLOW_NONE_AUTHENTICATION}
+      ETCD_ADVERTISE_CLIENT_URLS: ${ETCD_ADVERTISE_CLIENT_URLS}
+      ETCD_LISTEN_CLIENT_URLS: ${ETCD_LISTEN_CLIENT_URLS}
+      ETCD_LISTEN_PEER_URLS: ${ETCD_LISTEN_PEER_URLS}
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: ${ETCD_INITIAL_ADVERTISE_PEER_URLS}
+      ETCD_INITIAL_CLUSTER: "${ETCD_NAME}=${ETCD_INITIAL_CLUSTER}"
+      ETCD_INITIAL_CLUSTER_TOKEN: ${ETCD_INITIAL_CLUSTER_TOKEN}
+      ETCD_INITIAL_CLUSTER_STATE: ${ETCD_INITIAL_CLUSTER_STATE}
+      ETCD_NAME: ${ETCD_NAME}
+    networks:
+      - gomicro
+
+  # 链路追踪 jaeger
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - 16686:16686
+    networks:
+      - gomicro
+
+  # 网关
+  gateway:
+    build:
+      # 设置context为上级相对路径，避免dockerfile构建时add命令不能添加上级目录
+      context: ../
+      dockerfile: gateway/deploy/Dockerfile
+      args:
+        - EXPOSE_PORT=${GATEWAY_PORT}
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    environment:
+      MICRO_REGISTRY: ${MICRO_REGISTRY}
+      MICRO_SERVER_ADDRESS: ":${GATEWAY_PORT}"
+    volumes:
+      - "${WORKSPACE}:/go/src/go-micro"
+    depends_on:
+      - etcd
+      - jaeger
+      - meeting-api
+    networks:
+      - gomicro
+
+  # ------服务列表------
+  # 会议室预订服务【api】
+  meeting-api:
+    build:
+      context: ../
+      dockerfile: meeting-api/deploy/Dockerfile
+      args:
+        - EXPOSE_PORT=${MEETING_API_PORT}
+    ports:
+      - "${MEETING_API_PORT}:${MEETING_API_PORT}"
+    environment:
+      MICRO_REGISTRY: ${MICRO_REGISTRY}
+      MICRO_SERVER_ADDRESS: ":${MEETING_API_PORT}"
+    volumes:
+      - "${WORKSPACE}:/go/src/go-micro"
+    depends_on:
+      - etcd
+      - jaeger
+      - meeting-srv
+    networks:
+      - gomicro
+
+  # 会议室预订服务【srv】
+  meeting-srv:
+    build:
+      context: ../
+      dockerfile: meeting-srv/deploy/Dockerfile
+      args:
+        - EXPOSE_PORT=${MEETING_SRV_PORT}
+    ports:
+      - "${MEETING_SRV_PORT}:${MEETING_SRV_PORT}"
+    environment:
+      MICRO_REGISTRY: ${MICRO_REGISTRY}
+      MICRO_SERVER_ADDRESS: ":${MEETING_SRV_PORT}"
+    volumes:
+      - "${WORKSPACE}:/go/src/go-micro"
+    depends_on:
+      - etcd
+      - db
+    networks:
+      - gomicro
+
+  # 用户服务【srv】
+  user-srv:
+    build:
+      context: ../
+      dockerfile: user-srv/deploy/Dockerfile
+      args:
+        - EXPOSE_PORT=${USER_SRV_PORT}
+    ports:
+      - "${USER_SRV_PORT}:${USER_SRV_PORT}"
+    environment:
+      MICRO_REGISTRY: ${MICRO_REGISTRY}
+      MICRO_SERVER_ADDRESS: ":${USER_SRV_PORT}"
+    volumes:
+      - "${WORKSPACE}:/go/src/go-micro"
+    depends_on:
+      - etcd
+    networks:
+      - gomicro
+
+  # 消息通知服务【srv】
+  notice-srv:
+    build:
+      context: ../
+      dockerfile: notice-srv/deploy/Dockerfile
+      args:
+        - EXPOSE_PORT=${NOTICE_SRV_PORT}
+    ports:
+      - "${NOTICE_SRV_PORT}:${NOTICE_SRV_PORT}"
+    environment:
+      MICRO_REGISTRY: ${MICRO_REGISTRY}
+      MICRO_SERVER_ADDRESS: ":${NOTICE_SRV_PORT}"
+    depends_on:
+      - etcd
+      - db
+      - redis
+    volumes:
+      - "${WORKSPACE}:/go/src/go-micro"
+    networks:
+      - gomicro
+
+networks:
+  gomicro:
+    driver: bridge

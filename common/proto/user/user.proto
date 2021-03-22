@@ -1,0 +1,28 @@
+syntax = "proto3";
+package user;
+import "proto/response/response.proto";//标红无所谓，一样能导入
+option go_package = ".;proto";
+// protoc --go_out=转换输出为go文件的目录 --micro_out=转换输出为micro微服务文件的目录 原始proto文件所在位置
+
+service UserService{
+  rpc ValidateToken(ReqValidateToken) returns(response.Response){}
+  rpc BaseInfoEmployeeListNoPage(ReqBaseInfoEmployeeListNoPage) returns(response.Response){}
+}
+
+message ReqValidateToken{
+  string token = 1;
+  string c_id = 2;
+}
+
+message ReqBaseInfoEmployeeListNoPage{
+  string token = 1;
+  string c_id = 2;
+  string ids = 3;
+  string real_name = 4;
+  string mobile = 5;
+  string email = 6;
+  oneof one_status{
+    string status = 7;
+  }
+}
+

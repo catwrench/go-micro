@@ -1,0 +1,69 @@
+# 注册中心
+etcd:
+  port: "2379"
+  addr: "192.168.110.195"
+# 链路追踪
+jaeger.port: "6831"
+
+# go-micro服务
+gomicro:
+  gateway:
+    web: "go.micro.web.gateway"
+    name: "go.micro.service.gateway"
+    port: "6001"
+  api:
+    meeting:
+      name: "go.micro.api.meeting"
+      port: "6003"
+  srv:
+    user:
+      name: "go.micro.service.user"
+      port: "6004"
+    meeting:
+      name: "go.micro.service.meeting"
+      port: "6002"
+    notice:
+      name: "go.micro.service.notice"
+      port: "6005"
+
+# 数据库
+db:
+  name: "micro_dev"
+  addr: "192.168.110.195"
+  port: "3306"
+  username: "micro_dev"
+  password: "micro_dev"
+redis:
+  host: "192.168.110.195"
+  port: "6379"
+  password: ""
+  database: 0
+  maxActive: 10
+  maxIdle: 10
+  idleTimeout: 3
+
+# 日期格式化用，无法吐槽。。。
+datetime:
+  datetime: "2006-01-02 15:04:05"
+  date: "2006-01-02"
+  time: "15:04:05"
+
+# 外部服务地址,访问用户中心用，其实也就是验证一个token
+url:
+  uims:
+    scheme: "https"
+    host: ""
+
+# 公众号配置
+officialAccount:
+  appID: ""
+  appSecret: ""
+  token: ""
+  encodingAESKey: ""
+# 小程序配置
+miniProgram:
+  appId: ""
+  appSecret: ""
+
+
+

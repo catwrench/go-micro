@@ -1,0 +1,88 @@
+syntax = "proto3";
+package meeting;
+import "proto/response/response.proto";//标红无所谓，一样能导入
+
+option go_package = ".;proto";
+
+service SpaceService{
+  //查询所有地点列表
+  rpc GetAllSpaces(ReqGetAllSpaces) returns(response.Response){}
+  //查询地点列表
+  rpc GetSpaces(ReqGetSpaces) returns(response.Response){}
+  //查询地点详情
+  rpc GetSpace(ReqGetSpace) returns(response.Response){}
+  //新增地点
+  rpc CreateSpace(ReqCreateSpace)returns (response.Response){}
+  //编辑地点
+  rpc UpdateSpace(ReqUpdateSpace)returns (response.Response){}
+  //删除地点
+  rpc DelSpace(ReqDelSpace)returns (response.Response){}
+  //启用/禁用地点
+  rpc UpdateSpaceStatus(ReqUpdateSpaceStatus)returns (response.Response){}
+}
+
+message Space{
+  int64 id = 1 ;
+  string name = 2;
+  double lng = 3;
+  double lat = 4;
+  string status = 5;
+  string created_at = 6;
+}
+
+message ReqGetAllSpaces{
+  string sortBy = 1;
+  string order = 2;
+}
+
+message ReqGetSpaces{
+  //分页查询页码，从第一页开始
+  //@inject_tag: bson:"page"
+  int64 page = 1;
+  //分页查询每页数量，默认10
+  //@inject_tag: bson:"pageSize"
+  int64 pageSize = 2;
+  // 排序字段
+  //@inject_tag: bson:"sortBy"
+  string sortBy = 3;
+  // 顺序 desc降序 asc升序
+  //@inject_tag: bson:"order"
+  string order = 4;
+  oneof one_status{
+    string status = 5;
+  };
+}
+
+message ReqGetSpace{
+  int64 id = 1;
+}
+
+message ReqCreateSpace{
+  string name = 1;
+  double lng = 2;
+  double lat = 3;
+  oneof one_status{
+    string status = 4;
+  };
+}
+
+message ReqUpdateSpace{
+  int64 id = 1 ;
+  string name = 2;
+  double lng = 3;
+  double lat = 4;
+  oneof one_status{
+    string status = 5;
+  };
+}
+
+message ReqDelSpace{
+  int64 id = 1 ;
+}
+
+message ReqUpdateSpaceStatus{
+  int64 id = 1 ;
+  oneof one_status{
+    string status = 2;
+  };
+}

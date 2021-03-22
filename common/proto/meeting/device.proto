@@ -1,0 +1,53 @@
+syntax = "proto3";
+package meeting;
+import "proto/response/response.proto";//标红无所谓，一样能导入
+option go_package = ".;proto";
+
+service DeviceService{
+  //查询设备列表
+  rpc GetDevices(ReqGetDevices) returns(response.Response){}
+  //查询设备详情
+  rpc GetDevice(ReqGetDevice) returns(response.Response){}
+  //新增设备
+  rpc CreateDevice(ReqCreateDevice) returns(response.Response){}
+  //编辑设备
+  rpc UpdateDevice(ReqUpdateDevice) returns(response.Response){}
+  //删除设备
+  rpc DeleteDevice(ReqDeleteDevice) returns(response.Response){}
+}
+
+message device{
+  int64 id = 1;
+  string name = 2;
+  string sn = 3;
+  string image_url = 4;
+  string created_at = 5;
+}
+
+message ReqGetDevices{
+  int64 page = 1;
+  int64 pageSize = 2;
+  string sortBy = 3;
+  string order = 4;
+  string name = 5;
+}
+message ReqGetDevice{
+  int64 id = 1;
+
+}
+message ReqCreateDevice{
+  string name = 1;
+  string sn = 2;
+  string image_url = 3;
+}
+
+message ReqUpdateDevice{
+  int64 id = 1;
+  string name = 2;
+  string sn = 3;
+  string image_url = 4;
+}
+
+message ReqDeleteDevice{
+  int64 id = 1;
+}
